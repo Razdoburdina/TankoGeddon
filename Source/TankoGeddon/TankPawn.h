@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include "Cannon.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "TankPawn.generated.h"
 
 class UStaticMeshComponent;
 class UBoxComponent;
+class ACannon;
 
 UCLASS()
 class TANKOGEDDON_API ATankPawn : public APawn
@@ -23,6 +25,11 @@ public:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void RotateRight(float Value);
+
+	void SetupCannon();
+	void Fire();
+	void FireSpecial();
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,14 +51,29 @@ protected:
 		class UCameraComponent* Camera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		TSubclassOf<ACannon> CannonClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		class UArrowComponent* CannonSetupPoint;
+
+	UPROPERTY()
+		ACannon* Cannon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 		float MovementSpeed = 100.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		float RotationSpeed = 100.0f;
 
 private:
+	class ATankController* TankController;
+
 	float ForwardMoveAxisValue = 0.0f;
-
 	float RightMoveAxisValue = 0.0f;
-
-
+	float RotateRightAxisValue = 0.0f;
+	float CurrentRightAxisValue = 0.0f;
+	float RotateInterpolationKey = 0.1f;
+	float TurretInterpolationKey = 0.5f;
 
 };
 
