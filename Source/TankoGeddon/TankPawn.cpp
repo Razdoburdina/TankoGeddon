@@ -12,6 +12,7 @@
 #include "Cannon.h"
 
 
+
 // Sets default values
 ATankPawn::ATankPawn()
 {
@@ -47,7 +48,7 @@ void ATankPawn::BeginPlay()
 	Super::BeginPlay();
 
 	TankController = Cast< ATankController>(GetController());
-	SetupCannon();
+	SetupCannon(CannonClass);
 	
 }
 
@@ -77,7 +78,7 @@ void ATankPawn::Tick(float DeltaTime)
 	//BodyRotation
 
 	CurrentRightAxisValue = FMath::Lerp(CurrentRightAxisValue, RotateRightAxisValue, RotateInterpolationKey);
-	UE_LOG(LogTemp, Warning, TEXT("CurrentRightAxisValue %f, RotateRightAxisValue %f"), CurrentRightAxisValue, RotateRightAxisValue);
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentRightAxisValue %f, RotateRightAxisValue %f"), CurrentRightAxisValue, RotateRightAxisValue);
 
 	float yawRotation = CurrentRightAxisValue * RotationSpeed * DeltaTime;
 	FRotator currentRotation = GetActorRotation();
@@ -114,9 +115,22 @@ void ATankPawn::RotateRight(float Value)
 	RotateRightAxisValue = Value;
 }
 
-void ATankPawn::SetupCannon()
+void ATankPawn::ChangeCannon(TSubclassOf<ACannon> newCannon)
 {
-	if (!CannonClass)
+	if (bUsingPrimaryCannon)
+	{
+		CannonClass = newCannon;
+	}
+	else
+	{
+		SecondCannonClass = newCannon;
+	}
+	SetupCannon(newCannon);
+}
+
+void ATankPawn::SetupCannon(TSubclassOf<ACannon> newCannon)
+{
+	if (!newCannon)
 	{
 		return;
 	}
@@ -129,8 +143,21 @@ void ATankPawn::SetupCannon()
 	FActorSpawnParameters params;
 	params.Instigator = this;
 	params.Owner = this;
-	Cannon = GetWorld()->SpawnActor<ACannon>(CannonClass, params);
+	Cannon = GetWorld()->SpawnActor<ACannon>(newCannon, params);
 	Cannon->AttachToComponent(CannonSetupPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+void ATankPawn::SwitchCannon()
+{
+	if (bUsingPrimaryCannon)
+	{
+		SetupCannon(SecondCannonClass);
+	}
+	else
+	{
+		SetupCannon(CannonClass);
+	}
+	bUsingPrimaryCannon = !bUsingPrimaryCannon;
 }
 
 void ATankPawn::Fire()
@@ -146,6 +173,14 @@ void ATankPawn::FireSpecial()
 	if (Cannon)
 	{
 		Cannon->FireSpecial();
+	}
+}
+
+void ATankPawn::AddAmmo(int32 addedAmmo)
+{
+	if (Cannon)
+	{
+		Cannon->AddAmmo(addedAmmo);
 	}
 }
 

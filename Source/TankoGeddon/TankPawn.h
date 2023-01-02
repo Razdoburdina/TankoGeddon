@@ -27,9 +27,13 @@ public:
 	void MoveRight(float Value);
 	void RotateRight(float Value);
 
-	void SetupCannon();
+	void ChangeCannon(TSubclassOf<ACannon> newCannon);
+	void SetupCannon(TSubclassOf<ACannon> newCannon);
+	void SwitchCannon();
 	void Fire();
 	void FireSpecial();
+	void AddAmmo(int32 addedAmmo);
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -54,6 +58,9 @@ protected:
 		TSubclassOf<ACannon> CannonClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		TSubclassOf<ACannon> SecondCannonClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 		class UArrowComponent* CannonSetupPoint;
 
 	UPROPERTY()
@@ -68,6 +75,7 @@ protected:
 private:
 	class ATankController* TankController;
 
+	bool bUsingPrimaryCannon = true;
 	float ForwardMoveAxisValue = 0.0f;
 	float RightMoveAxisValue = 0.0f;
 	float RotateRightAxisValue = 0.0f;
